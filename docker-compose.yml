@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-app:${IMAGE_TAG:-local}
+    container_name: cicd-lab-app
+    environment:
+      APP_VERSION: ${APP_VERSION:-local}
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
