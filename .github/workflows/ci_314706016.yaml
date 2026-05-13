@@ -1,4 +1,4 @@
-name:                CI 314706016     
+name: CI 314706016
 
 on:
   push:
