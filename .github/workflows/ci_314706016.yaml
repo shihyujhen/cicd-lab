@@ -38,6 +38,28 @@ jobs:
       - name: Test
         run: npm test -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest-junit.xml
 
+      - name: Add test result summary
+        if: always() && hashFiles('reports/vitest-junit.xml') != ''
+        run: |
+          node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          const xml = fs.readFileSync('reports/vitest-junit.xml', 'utf8');
+          const attrs = Object.fromEntries(
+            [...xml.matchAll(/\b(tests|failures|errors|skipped|time)="([^"]*)"/g)].map(([, key, value]) => [
+              key,
+              value,
+            ]),
+          );
+
+          console.log('## Vitest Test Results');
+          console.log('');
+          console.log(`- Tests: ${attrs.tests ?? '0'}`);
+          console.log(`- Failures: ${attrs.failures ?? '0'}`);
+          console.log(`- Errors: ${attrs.errors ?? '0'}`);
+          console.log(`- Skipped: ${attrs.skipped ?? '0'}`);
+          console.log(`- Duration: ${attrs.time ?? '0'}s`);
+          NODE
+
       - name: Publish test report
         uses: dorny/test-reporter@v1
         if: always() && hashFiles('reports/vitest-junit.xml') != ''
